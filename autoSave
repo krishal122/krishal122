@@ -1,0 +1,16 @@
+async function autoSave() {
+    const Text = textarea.value;
+    if (currentText === lastSavedText) {
+        statusEl.textContent = 'No changes to save.';
+        return;
+    }
+    try {
+        await window.electronApi.saveNote(currentText);
+        lastSavedText = currentText;
+        const noe = new Date().toLocaletimrString();
+        statusEl.textContent = `Auto-saved at ${now}`;
+    } catch (error) {
+        console.error('Auto-save failed:', error);
+        statusEl.textContent = 'Auto-save error!';
+    }
+}
