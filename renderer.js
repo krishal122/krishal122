@@ -1,30 +1,35 @@
 window.addEventListener('DOMContentLoaded', async () => {
-    const textarea = document.getElementById('note');
-    const saveBtn = document.getElementById('save');
-    const statusEl = document.getElementById('save_status');
-    // Load existing note  on startup 
-    const savedNote = await window.electronAPI.loadNote();  
-    textarea.value = savedNote; 
+  const textarea = document.getElementById('note');
+  const newNoteBtn = document.getElementById('new-note');
+  const saveBtn = document.getElementById('save');
+  const saveAsBtn = document.getElementById('save-as');
+  const statusEl = document.getElementById('status');
 
-    saveBtn.addEventListener('click', async () => { 
-        await window.electronAPI.saveNote(textarea.value);
-        alert('Note saved successfully!');     
-    });
-}); 
+  // Load saved note on startup
+  const savedNote = await window.electronAPI.loadNote();
+  textarea.value = savedNote;
 
-async function autoSave() {
-    const Text = textarea.value;
-    if (currentText === lastSavedText) {
-        statusEl.textContent = 'No changes to save.';
-        return;
+  newNoteBtn.addEventListener('click', async () => {
+    const result = await window.electronAPI.newNote();
+    if (result.confirmed) {
+      textarea.value = '';
+      statusEl.textContent = 'Ready for a new note.';
     }
-    try {
-        await window.electronApi.saveNote(currentText);
-        lastSavedText = currentText;
-        const noe = new Date().toLocaletimrString();
-        statusEl.textContent = `Auto-saved at ${now}`;
-    } catch (error) {
-        console.error('Auto-save failed:', error);
-        statusEl.textContent = 'Auto-save error!';
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    await window.electronAPI.saveNote(textarea.value);
+    alert('Note saved successfully!');
+    statusEl.textContent = 'Note saved to your Documents folder.';
+  });
+
+  saveAsBtn.addEventListener('click', async () => {
+    const result = await window.electronAPI.saveAs(textarea.value);
+    if (result.success) {
+      statusEl.textContent = `Saved to: ${result.filePath}`;
+    } else {
+      statusEl.textContent = 'Save As cancelled.';
     }
-}
+  });
+});
+
