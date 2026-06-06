@@ -5,6 +5,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadNote: () => ipcRenderer.invoke('load-note'),
   saveAs: (text) => ipcRenderer.invoke('save-as', text), 
   newNote: () => ipcRenderer.invoke('new-note'),  //NEW
-  openFile: () => ipcRenderer.invoke('open-file')  //NEW
+  openFile: () => ipcRenderer.invoke('open-file'),  //NEW
+  moveToTrash: (text) =>
+  ipcRenderer.invoke('move-to-trash', text),
+restoreNote: () =>
+  ipcRenderer.invoke('restore-note'),
+emptyTrash: () =>
+  ipcRenderer.invoke('empty-trash'),
 });
 

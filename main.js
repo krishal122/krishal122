@@ -2,8 +2,8 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 
 app.disableHardwareAcceleration();
 
-const path = require('node:path');
-const fs = require('node:fs');
+const path = require('path');
+const fs = require('fs');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -65,10 +65,10 @@ ipcMain.handle('new-note', async (event) => {
     defaultId: 1,
     title: 'Unsaved Changes',
     message: 'You have unsaved changes. Start a new note anyway?'
-});
+  });
 
-// result.response === 0 means user chose 'Discard Changes'
-return {confirmed: result.response === 0};
+  // result.response === 0 means user chose 'Discard Changes'
+  return {confirmed: result.response === 0};
 });
 // NEW: Open file handler
 ipcMain.handle('open-file', async (event) => {
@@ -84,4 +84,54 @@ ipcMain.handle('open-file', async (event) => {
   const filePath = result.filePaths[0];
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   return { success: true, filePath: filePath, content: fileContent };
+});
+
+// Move Note to Trash
+ipcMain.handle('move-to-trash', async (event, text) => {
+
+  const trashPath = path.join(
+    app.getPath('documents'),
+    'trashnote.txt'
+  );
+
+  fs.writeFileSync(trashPath, text, 'utf-8');
+
+  return { success: true };
+});
+
+// Restore Note from Trash
+ipcMain.handle('restore-note', async () => {
+
+  const trashPath = path.join(
+    app.getPath('documents'),
+    'trashnote.txt'
+  );
+
+  if (fs.existsSync(trashPath)) {
+
+    const content =
+      fs.readFileSync(trashPath, 'utf-8');
+
+    return {
+      success: true,
+      content: content
+    };
+  }
+
+  return { success: false };
+});
+
+// Empty Trash Permanently
+ipcMain.handle('empty-trash', async () => {
+
+  const trashPath = path.join(
+    app.getPath('documents'),
+    'trashnote.txt'
+  );
+
+  if (fs.existsSync(trashPath)) {
+    fs.unlinkSync(trashPath);
+  }
+
+  return { success: true };
 });
